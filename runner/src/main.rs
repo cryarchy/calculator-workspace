@@ -23,25 +23,28 @@ pub async fn add(add_path: PathBuf, calc_path: PathBuf, x: i32, y: i32) -> wasmt
     let calc_component =
         Component::from_file(&engine, calc_path).context("Calculator component file not found")?;
 
+    let (_, add_interface_export) = add_component.export_index(None, "docs:adder/add").unwrap();
+    let (_, add_fn_export) = add_component
+        .export_index(Some(&add_interface_export), "add")
+        .unwrap();
     let add_instance = linker.instantiate_async(&mut store, &add_component).await?;
 
     let add = add_instance
-        .exports(&mut store)
-        .instance("docs:adder/add")
-        .expect("instance 'docs:adder/add' not found")
-        .func("add")
+        .get_func(&mut store, add_fn_export)
         .expect("add function not found");
 
-    // let mut results = [Val::S32(0)];
+    let mut results = [Val::S32(0)];
 
-    // add.call_async(&mut store, &[Val::S32(5), Val::S32(3)], &mut results)
-    //     .await?;
+    add.call_async(&mut store, &[Val::S32(5), Val::S32(3)], &mut results)
+        .await?;
 
-    // let Val::S32(result) = results[0] else {
-    //     panic!("Unexpected result type");
-    // };
+    add.post_return_async(&mut store).await?;
 
-    // println!("5 + 3 = {}", result);
+    let Val::S32(result) = results[0] else {
+        panic!("Unexpected result type");
+    };
+
+    println!("5 + 3 = {}", result);
 
     linker.instance("docs:adder/add")?.func_wrap_async(
         "add",
@@ -64,14 +67,18 @@ pub async fn add(add_path: PathBuf, calc_path: PathBuf, x: i32, y: i32) -> wasmt
         },
     )?;
 
+    let (_, calc_interface_export) = calc_component
+        .export_index(None, "component:calculator/calculate")
+        .unwrap();
+    let (_, calc_fn_export) = calc_component
+        .export_index(Some(&calc_interface_export), "eval-expression")
+        .unwrap();
+
     let calc_instance = linker
         .instantiate_async(&mut store, &calc_component)
         .await?;
     let calc_fn = calc_instance
-        .exports(&mut store)
-        .instance("component:calculator/calculate")
-        .expect("instance 'component:calculator/calculate' not found")
-        .func("eval-expression")
+        .get_func(&mut store, calc_fn_export)
         .expect("eval-expression function not found");
     let mut result = [Val::S32(0)];
     calc_fn
