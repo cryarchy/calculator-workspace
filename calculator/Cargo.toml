@@ -1,0 +1,25 @@
+[package]
+edition = "2021"
+name = "calculator"
+version = "0.1.0"
+
+[dependencies]
+wit-bindgen-rt = {version = "0.28.0", features = ["bitflags"]}
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+codegen-units = 1
+debug = false
+lto = true
+opt-level = "s"
+strip = true
+
+[package.metadata.component]
+package = "component:calculator"
+
+[package.metadata.component.dependencies]
+
+[package.metadata.component.target.dependencies]
+"docs:adder" = {path = "../add/wit"}

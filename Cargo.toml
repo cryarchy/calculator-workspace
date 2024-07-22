@@ -1,0 +1,9 @@
+[workspace]
+members = ["add", "runner", "calculator"]
+resolver = "2"
+
+[workspace.dependencies]
+anyhow = "1.0"
+tokio = {version = "1", features = ["macros"]}
+wasmtime = {version = "22.0", features = ["runtime", "component-model"]}
+wasmtime-wasi = "22.0.0"

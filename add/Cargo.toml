@@ -1,0 +1,22 @@
+[package]
+edition = "2021"
+name = "add"
+version = "0.1.0"
+
+[dependencies]
+wit-bindgen-rt = {version = "0.28.0", features = ["bitflags"]}
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+codegen-units = 1
+debug = false
+lto = true
+opt-level = "s"
+strip = true
+
+[package.metadata.component]
+package = "docs:adder"
+
+[package.metadata.component.dependencies]

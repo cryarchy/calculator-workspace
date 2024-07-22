@@ -1,0 +1,9 @@
+package docs:adder;
+
+interface add {
+    add: func(a: s32, b: s32) -> s32;
+}
+
+world adder {
+    export add;
+}
